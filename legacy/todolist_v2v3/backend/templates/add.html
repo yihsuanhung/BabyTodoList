@@ -1,0 +1,12 @@
+<html>
+    <header>
+        <title> title </title>
+    </header>
+    <body>
+        <h1>add something to the list</h1>
+        <form action="{{ url_for('add_task') }}" method="post">
+            <input type="text" name="content">
+            <input type="submit" value="ADD">
+        </form>
+    </body>
+</html>

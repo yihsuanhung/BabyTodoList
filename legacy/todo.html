@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <style>
+        li.active{
+            color: #cccccc;
+        }
+    </style>
+</head>
+<body>
+    <div id="todo">
+        <h3>TODO List</h3>
+        <input 
+            type="text" 
+            placeholder="Add new task"
+            v-model="newTask" 
+            @keyup.enter="addTask(newTask)" 
+        />
+        <button @click="addTask(newTask)">Add</button>
+
+        <ul>
+            <li v-for="todo in todolist" v-bind:class="{ active: todo.complete }">
+                <input type="checkbox" v-model="todo.complete">
+                {{todo.content}}
+                <button @click="deleteTask(todo)">Delete</button>
+                <button 
+                    @click="updateTrigger(todo)" 
+                    v-model="todo.update" 
+                    v-if="!todo.update"
+                >Edit</button>
+                <input
+                    v-if="todo.update"
+                    type="text" 
+                    v-model="updatedTask" 
+                    @keyup.enter="updateTask(todo,updatedTask);updateTrigger(todo)" 
+                    placeholder="Type new task here"
+                >
+                <button 
+                    v-if="todo.update" 
+                    @click="updateTask(todo,updatedTask);updateTrigger(todo)"
+                    v-model="updatedTask"
+                >Update</button>                
+                <button 
+                    v-if="todo.update" 
+                    @click="updateTrigger(todo)" 
+                >Cancel</button>
+            </li>
+        </ul>
+        
+        <br>
+        <pre>
+            {{this.todolist}}
+        </pre>
+          
+    </div>
+
+    <script src="todo.js"></script>
+</body>
+</html>
