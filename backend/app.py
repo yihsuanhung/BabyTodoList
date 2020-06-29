@@ -23,17 +23,43 @@ def index():
     return jsonify(result)
 
 
+# def pagination(page, limit):
+#     db_len = controller.table_length()['length']
+#     offset = limit * (page - 1)
+#
+#     # find the maximum page number
+#     if db_len % limit == 0:
+#         max_page = int(db_len / limit)
+#     else:
+#         max_page = int(db_len / limit) + 1
+#
+#     # print(f"max page for limit={limit}: {max_page} ")
+#
+#     if page <= max_page:
+#         result = controller.paged_index(limit=limit, offset=offset)
+#         return jsonify({'data': result, 'db_len': db_len})
+#     else:
+#         return "no data available"
+
+
+# 檢索（分頁）
+@app.route('/index')
+def paged_index():
+    page = controller.pagination(page=int(request.args['page']), limit=int(request.args['limit']))
+    return jsonify(page)
+
+
 # 新增
 @app.route('/add', methods=['GET', 'POST'])
 def add_task():
     if request.method == 'POST':
-        # data = request.form['content']
         data = request.get_data()
         data = json.loads(data)
-        # data = request.get_json()
         data = data["content"]
-        result = controller.add_task(data=data)
-        return jsonify(result)
+        controller.add_task(data=data)
+        page = controller.pagination(page=int(request.args['page']), limit=int(request.args['limit']))
+        return jsonify(page)
+
     else:
         return render_template('add.html')
 
@@ -42,8 +68,10 @@ def add_task():
 @app.route('/delete/<int:task_id>', methods=['GET', 'DELETE'])
 def delete_task(task_id):
     if request.method == 'DELETE':
-        result = controller.delete_task(task_id)
-        return jsonify(result)
+        controller.delete_task(task_id)
+        page = controller.pagination(page=int(request.args['page']), limit=int(request.args['limit']))
+        return jsonify(page)
+
     else:
         err_msg = {'code': 1, 'msg': 'ERROR: please use DELETE method'}
         return jsonify(err_msg)
@@ -56,8 +84,10 @@ def edit_task(task_id):
         data = request.get_data()
         data = json.loads(data)
         data = data["content"]
-        result = controller.edit_task(task_id=task_id, data=data)
-        return jsonify(result)
+        controller.edit_task(task_id=task_id, data=data)
+        page = controller.pagination(page=int(request.args['page']), limit=int(request.args['limit']))
+        return jsonify(page)
+
     else:
         err_msg = {'code': 1, 'msg': 'ERROR: please use PUT method'}
         return jsonify(err_msg)
@@ -67,8 +97,10 @@ def edit_task(task_id):
 @app.route('/done/<int:task_id>', methods=['GET', 'PUT'])
 def task_done(task_id):
     if request.method == 'PUT':
-        result = controller.task_done(task_id)
-        return jsonify(result)
+        controller.task_done(task_id)
+        page = controller.pagination(page=int(request.args['page']), limit=int(request.args['limit']))
+        return jsonify(page)
+
     else:
         err_msg = {'code': 1, 'msg': 'ERROR: please use PUT method'}
         return jsonify(err_msg)
@@ -78,11 +110,19 @@ def task_done(task_id):
 @app.route('/undo/<int:task_id>', methods=['GET', 'PUT'])
 def task_undo(task_id):
     if request.method == 'PUT':
-        result = controller.task_undo(task_id)
-        return jsonify(result)
+        controller.task_undo(task_id)
+        page = controller.pagination(page=int(request.args['page']), limit=int(request.args['limit']))
+        return jsonify(page)
+
     else:
         err_msg = {'code': 1, 'msg': 'ERROR: please use PUT method'}
         return jsonify(err_msg)
+
+
+@app.route('/count')
+def table_length():
+    result = controller.table_length()
+    return jsonify(result)
 
 
 # 開啟編輯

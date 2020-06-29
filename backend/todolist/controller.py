@@ -24,6 +24,30 @@ class Controller:
         result = convert_list_to_dict(result)
         return result
 
+    def table_length(self):
+        result = self.model.table_length(table_name=self.table_name)
+        return result
+
+    def paged_index(self, limit, offset):
+        result = self.model.paged_index(limit=limit, offset=offset, table_name=self.table_name)
+        result = convert_list_to_dict(result)
+        return result
+
+    def pagination(self, page, limit):
+        db_len = self.table_length()['length']
+        offset = limit * (page - 1)
+        # find the maximum page number
+        if db_len % limit == 0:
+            max_page = int(db_len / limit)
+        else:
+            max_page = int(db_len / limit) + 1
+        # print(f"max page for limit={limit}: {max_page} ")
+        if page <= max_page:
+            result = self.paged_index(limit=limit, offset=offset)
+            return {'data': result, 'db_len': db_len}
+        else:
+            return {'data': "no data available"}
+
     def add_task(self, data):
         result = self.model.add_task(data=data, table_name=self.table_name)
         if result['code'] == 0:

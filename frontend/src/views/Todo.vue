@@ -100,7 +100,13 @@
     <button @click="apiDone()">Done</button> |
     <button @click="apiUndo()">Undo</button> |
     <button @click="apiDelete()">Delete</button>
-    <br /><br /><br />
+    <br /><br />
+    <table align="center">
+      <td v-for="(item, index) in this.pagination.maxPage" :key="index">
+        <button @click="apiIndex(item)">{{ item }}</button>
+      </td>
+    </table>
+    <br /><br />
     <span v-show="selection.length !== 0">Selection: {{ selection }}</span>
   </div>
 </template>
@@ -125,6 +131,10 @@ export default {
       apiNewTask: "",
       apiURL: API.Host + ":" + API.Port,
       apiConfig: {},
+      pagination: {
+        page: 1, 
+        limit: 5
+      },
     };
   },
   created() {
@@ -134,16 +144,18 @@ export default {
     async getRequest() {
       let config = {
         baseURL: this.apiURL,
-        url: "",
-        method: "get"
+        url: "/index",
+        method: "get",
+        params: this.pagination
       }
       let result = await sendReq(config); 
-      // console.log("---before process---")
-      // console.log(result)
-      result = this.preprocess(result)
-      // console.log("---after process---")
-      // console.log(result)
-      this.calssifyTasks(result)
+      let data = result['data']
+      data = this.preprocess(data)
+      this.calssifyTasks(data)
+
+      //page
+      this.pagination.dbLen = result['db_len']
+      this.pagination.maxPage = Math.ceil(this.pagination.dbLen/this.pagination.limit)
     },
     preprocess(objArr){
       // Add two field, 'editStatus' and 'editContent', to each object
@@ -168,8 +180,133 @@ export default {
           this.fetchedData.done.push(data);
         }
       }
-      // console.log(this.fetchedData.undo)
-      // console.log(this.fetchedData.done)
+    },
+    async apiIndex(page){
+      let config = {
+        baseURL: this.apiURL,
+        url: "/index",
+        method: "get",
+        params: {
+          page: page,
+          limit: this.pagination.limit
+        }
+      }
+      this.pagination.page = page
+      let result = await sendReq(config);
+      let data = result['data']
+      this.calssifyTasks(data)
+    },
+    async apiDone() {
+      if (this.selection.length !== 0) {
+        for (let i = 0; i < this.selection.length; i++) {
+          let taskId = this.selection[i];
+          let config = {
+            baseURL: this.apiURL,
+            url: "/done/" + Number(taskId),
+            method: "put",
+            params: {
+              page: this.pagination.page,
+              limit: this.pagination.limit
+            }
+          }
+          let result = await sendReq(config);
+          let data = result['data']
+          this.calssifyTasks(data);
+        }
+        this.selection = [];
+      }
+    },
+    async apiUndo() {
+      if (this.selection.length !== 0) {
+        for (let i = 0; i < this.selection.length; i++) {
+          let taskId = this.selection[i];
+          let config = {
+            baseURL: this.apiURL,
+            url: "/undo/" + Number(taskId),
+            method: "put",
+            params: {
+              page: this.pagination.page,
+              limit: this.pagination.limit
+            }
+          };
+          let result = await sendReq(config);
+          let data = result['data']
+          this.calssifyTasks(data);
+        }
+        this.selection = [];
+      }
+    },
+    async apiAdd(apiNewTask) {
+      if (apiNewTask !== "") {
+        this.pagination.page = 1
+        let config = {
+          baseURL: this.apiURL,
+          url: "/add",
+          method: "post",
+          params: {
+            page: this.pagination.page,
+            limit: this.pagination.limit
+          },
+          data: JSON.stringify({ content: apiNewTask }),
+        };
+        let result = await sendReq(config);
+        let data = result['data']
+        this.calssifyTasks(data);
+        this.apiNewTask = "";
+      }
+    },
+    async apiDelete() {
+      if (this.selection.length !== 0) {
+        for (let i = 0; i < this.selection.length; i++) {
+          let taskId = this.selection[i];
+          let config = {
+            baseURL: this.apiURL,
+            url: "/delete/" + Number(taskId),
+            method: "delete",
+            params: {
+              page: this.pagination.page,
+              limit: this.pagination.limit
+            }
+          };
+          let result = await sendReq(config);
+          let data = result['data']
+          this.calssifyTasks(data);
+        }
+      }
+      this.selection = [];
+    },
+    apiEditStatSwitch(task_id, mode) {
+      if (mode === "undo") {
+        for (let i = 0; i < this.fetchedData.undo.length; i++) {
+        if (this.fetchedData.undo[i]["id"] === task_id) {
+          this.fetchedData.undo[i]["editStatus"] = !this.fetchedData.undo[i]["editStatus"]
+          }
+        }
+      } else if (mode === "done") {
+        for (let i = 0; i < this.fetchedData.done.length; i++) {
+        if (this.fetchedData.done[i]["id"] === task_id) {
+          this.fetchedData.done[i]["editStatus"] = !this.fetchedData.done[i]["editStatus"]
+          }
+        }
+      }
+      this.$forceUpdate();
+    },
+    async apiEdit(task_id, editedTask) {
+      if (editedTask !== "") {
+        let config = {
+          baseURL: this.apiURL,
+          url: "/edit/" + Number(task_id),
+          method: "put",
+          params: {
+            page: this.pagination.page,
+            limit: this.pagination.limit
+          },
+          data: JSON.stringify({ content: editedTask }),
+        };
+        let result = await sendReq(config);
+        let data = result['data']
+        this.calssifyTasks(data);
+      }
     },
     selectAll(arr, selection = this.selection) {
       for (let i = 0; i < arr.length; i++) {
@@ -224,89 +361,6 @@ export default {
       } else if (mode === "all"){
         this.reverseSelection(this.fetchedData.undo.concat(this.fetchedData.done))
       }
-      
-    },
-    async apiDone() {
-      if (this.selection.length !== 0) {
-        for (let i = 0; i < this.selection.length; i++) {
-          let taskId = this.selection[i];
-          let config = this.apiConfig;
-          config.url = "/done/" + Number(taskId);
-          config.baseURL = this.apiURL;
-          config.method = "put";
-          let result = await sendReq(config);
-          this.calssifyTasks(result);
-        }
-        this.selection = [];
-      }
-    },
-    async apiUndo() {
-      if (this.selection.length !== 0) {
-        for (let i = 0; i < this.selection.length; i++) {
-          let taskId = this.selection[i];
-          let config = this.apiConfig;
-          config.url = "/undo/" + Number(taskId);
-          config.baseURL = this.apiURL;
-          config.method = "put";
-          let result = await sendReq(config);
-          this.calssifyTasks(result);
-        }
-        this.selection = [];
-      }
-    },
-    async apiAdd(apiNewTask) {
-      if (apiNewTask !== "") {
-        let config = this.apiConfig;
-        config.url = "/add";
-        config.baseURL = this.apiURL;
-        config.method = "post";
-        config.data = JSON.stringify({ content: apiNewTask });
-        let result = await sendReq(config);
-        this.calssifyTasks(result);
-        this.apiNewTask = "";
-      }
-    },
-    async apiDelete() {
-      if (this.selection.length !== 0) {
-        for (let i = 0; i < this.selection.length; i++) {
-          let taskId = this.selection[i];
-          let config = this.apiConfig;
-          config.url = "/delete/" + Number(taskId);
-          config.baseURL = this.apiURL;
-          config.method = "delete";
-          let result = await sendReq(config);
-          this.calssifyTasks(result);
-        }
-      }
-      this.selection = [];
-    },
-    apiEditStatSwitch(task_id, mode) {
-      if (mode === "undo") {
-        for (let i = 0; i < this.fetchedData.undo.length; i++) {
-        if (this.fetchedData.undo[i]["id"] === task_id) {
-          this.fetchedData.undo[i]["editStatus"] = !this.fetchedData.undo[i]["editStatus"]
-          }
-        }
-      } else if (mode === "done") {
-        for (let i = 0; i < this.fetchedData.done.length; i++) {
-        if (this.fetchedData.done[i]["id"] === task_id) {
-          this.fetchedData.done[i]["editStatus"] = !this.fetchedData.done[i]["editStatus"]
-          }
-        }
-      }
-      this.$forceUpdate();
-    },
-    async apiEdit(task_id, editedTask) {
-      if (editedTask !== "") {
-        let config = this.apiConfig;
-        config.url = "/edit/" + Number(task_id);
-        config.baseURL = this.apiURL;
-        config.method = "put";
-        config.data = JSON.stringify({ content: editedTask });
-        let result = await sendReq(config);
-        this.calssifyTasks(result);
-        // this.fetchedData = result
-      }
     },
   },
   //components: {
@@ -329,4 +383,5 @@ export default {
 .doneEditBut{
     color: #757575;
 }
+
 </style>

@@ -91,9 +91,9 @@ export default {
       let returnData = [];
       for (let item in result) {
         let itemData = {};
-        itemData["id"] = result[item][0];
-        itemData["content"] = result[item][1];
-        itemData["status"] = result[item][2];
+        itemData["id"] = result[item]["id"];
+        itemData["content"] = result[item]["content"];
+        itemData["status"] = result[item]["status"];
         itemData["editStatus"] = false;
         itemData["editContent"] = "";
         returnData.push(itemData);

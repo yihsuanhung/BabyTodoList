@@ -62,17 +62,31 @@ class Model:
         print(f'mark data: id={task_id} as undo')
         return result
 
-    def edit_on(self, table_name=None, task_id=None):
-        sql_exe = f"update {table_name} set editstat = true where id = {task_id};"
-        result = self.do_exec(sql_exe)
-        print(f'turn edit status on, data: id={task_id}')
+    def table_length(self, table_name=None):
+        sql_exe = f"select count(0) from {table_name};"
+        self.c.execute(sql_exe)
+        result = self.c.fetchone()[0]
+        # print(f'count length of table, {table_name}: {result}')
+        code = {'code': 0, 'length': result}
+        return code
+
+    def paged_index(self, limit, offset, table_name=None):
+        sql_exe = f"select * from {table_name} order by id DESC limit {limit} offset {offset};"
+        result = self.c.execute(sql_exe).fetchall()
+        # print("pagination")
         return result
 
-    def edit_off(self, table_name=None, task_id=None):
-        sql_exe = f"update {table_name} set editstat = false where id = {task_id};"
-        result = self.do_exec(sql_exe)
-        print(f'turn edit status off, data: id={task_id}')
-        return result
+    # def edit_on(self, table_name=None, task_id=None):
+    #     sql_exe = f"update {table_name} set editstat = true where id = {task_id};"
+    #     result = self.do_exec(sql_exe)
+    #     print(f'turn edit status on, data: id={task_id}')
+    #     return result
+    #
+    # def edit_off(self, table_name=None, task_id=None):
+    #     sql_exe = f"update {table_name} set editstat = false where id = {task_id};"
+    #     result = self.do_exec(sql_exe)
+    #     print(f'turn edit status off, data: id={task_id}')
+    #     return result
 
     def do_exec(self, sql):  # 封裝exec
         try:
