@@ -1,118 +1,171 @@
 <template>
   <div id="todo">
-    <!-- 後端資料 -->
     <h3>TDL</h3>
-    <pre>
-      <input 
-        type="text" 
-        placeholder="Add new task"
-        v-model="apiNewTask" 
-        @keyup.enter="apiAdd(apiNewTask)"
-      /> <button @click="apiAdd(apiNewTask)">Add</button>
-    </pre>
-    <!-- <button @click="getRequest()">Reload</button> |  -->
-    <button @click="selectAllFunction('all')">Select All</button> |
-    <button @click="reverseFunction('all')">Reverse</button> |
-    <button @click="clearFunction('all')">Clear</button>
+    <Add
+      :intest="inTest"
+      :data="this.fetchedData"
+      @outData="returnData($event)"
+      @outPage="returnPage($event)"
+    />
 
-    <br /><br />
-    <button @click="apiDone()">Done</button> |
-    <button @click="apiUndo()">Undo</button> |
-    <button @click="apiDelete()">Delete</button>
+    <Tasks
+      :inData="this.fetchedData"
+      :inSelection="this.selection"
+      :inPage="this.pagination.page"
+      :inLimit="this.pagination.limit"
+      @TasksOutEdit="returnData($event)"
+      @TaskOutSelect="updateSelection($event)"
+    />
 
-    <br /><br />
-    <h4>Tasks todo</h4>
-    <button @click="selectAllFunction('undo')">Select All</button> |
-    <button @click="reverseFunction('undo')">Reverse</button> |
-    <button @click="clearFunction('undo')">Clear</button>
-    <br />
-    <ul class="undoTasks">
-      <li v-for="(item, index) in this.fetchedData.undo" :key="index">
-        <input type="checkbox" :value="item['id']" v-model="selection" />
-        {{ item["id"] }},
-        {{ item["content"] }}
-        <button
-          @click="apiEditStatSwitch(item['id'], 'undo')"
-          v-if="!item['editStatus']"
-        >
-          Edit
-        </button>
-        <input
-          type="text"
-          v-if="item['editStatus']"
-          v-model="item['editContent']"
-          @keyup.enter="apiEdit(item['id'], item['editContent'])"
-        />
-        <button
-          @click="apiEdit(item['id'], item['editContent'])"
-          v-if="item['editStatus']"
-        >
-          Update
-        </button>
-        <button
-          @click="apiEditStatSwitch(item['id'], 'undo')"
-          v-if="item['editStatus']"
-        >
-          Cancel
-        </button>
-      </li>
-    </ul>
+    <Done
+      :inArr="selection"
+      :inPage="this.pagination.page"
+      :inLimit="this.pagination.limit"
+      @TasksOutDone="returnData($event)"
+    />
 
-    <h4>Tasks done</h4>
-    <button @click="selectAllFunction('done')">Select All</button> |
-    <button @click="reverseFunction('done')">Reverse</button> |
-    <button @click="clearFunction('done')">Clear</button>
-    <br />
-    <ul class="doneTasks">
-      <li v-for="(item, index) in this.fetchedData.done" :key="index">
-        <input type="checkbox" :value="item['id']" v-model="selection" />
-        {{ item["id"] }},
-        {{ item["content"] }}
-        <button
-          class="doneEditBut"
-          @click="apiEditStatSwitch(item['id'], 'done')"
-          v-if="!item['editStatus']"
-        >
-          Edit
-        </button>
-        <input
-          type="text"
-          v-if="item['editStatus']"
-          v-model="item['editContent']"
-          @keyup.enter="apiEdit(item['id'], item['editContent'])"
-        />
-        <button
-          @click="apiEdit(item['id'], item['editContent'])"
-          v-if="item['editStatus']"
-        >
-          Update
-        </button>
-        <button
-          @click="apiEditStatSwitch(item['id'], 'done')"
-          v-if="item['editStatus']"
-        >
-          Cancel
-        </button>
-      </li>
-    </ul>
+    <Undo
+      :inArr="selection"
+      :inPage="this.pagination.page"
+      :inLimit="this.pagination.limit"
+      @TasksOutUndo="returnData($event)"
+    />
 
-    <br /><br />
-    <button @click="apiDone()">Done</button> |
-    <button @click="apiUndo()">Undo</button> |
-    <button @click="apiDelete()">Delete</button>
-    <br /><br />
-    <table align="center">
-      <td v-for="(item, index) in this.pagination.maxPage" :key="index">
-        <button @click="apiIndex(item)">{{ item }}</button>
-      </td>
-    </table>
-    <br /><br />
+    <Delete
+      :inArr="selection"
+      :inPage="this.pagination.page"
+      :inLimit="this.pagination.limit"
+      @TasksOutDelete="returnData($event)"
+      @SelectionOut="updateSelection($event)"
+    />
+
+    <Pagination
+      :page="this.pagination.page"
+      :limit="this.pagination.limit"
+      :dbLen="this.pagination.dbLen"
+      :maxPage="this.pagination.maxPage"
+      @PagesOut="returnPage($event)"
+      @TaskOutIndex="returnData($event)"
+    />
+
     <span v-show="selection.length !== 0">Selection: {{ selection }}</span>
+    <!-- <pre> -->
+    <!-- <input  -->
+    <!-- type="text"  -->
+    <!-- placeholder="Add new task" -->
+    <!-- v-model="apiNewTask"  -->
+    <!-- @keyup.enter="apiAdd(apiNewTask)" -->
+    <!-- /> <button @click="apiAdd(apiNewTask)">Add</button> -->
+    <!-- </pre> -->
+
+    <!-- <button @click="selectAllFunction('all')">Select All</button> | -->
+    <!-- <button @click="reverseFunction('all')">Reverse</button> | -->
+    <!-- <button @click="clearFunction('all')">Clear</button> -->
+
+    <!-- <br /><br /> -->
+    <!-- <button @click="apiDone()">Done</button> | -->
+    <!-- <button @click="apiUndo()">Undo</button> | -->
+    <!-- <button @click="apiDelete()">Delete</button> -->
+
+    <!-- <br /><br /> -->
+
+    <!-- <h4>Tasks todo</h4> -->
+    <!-- <button @click="selectAllFunction('undo')">Select All</button> | -->
+    <!-- <button @click="reverseFunction('undo')">Reverse</button> | -->
+    <!-- <button @click="clearFunction('undo')">Clear</button> -->
+    <!-- <br /> -->
+    <!-- <ul class="undoTasks"> -->
+    <!-- <li v-for="(item, index) in this.fetchedData.undo" :key="index"> -->
+    <!-- <input type="checkbox" :value="item['id']" v-model="selection" /> -->
+    <!-- {{ item["id"] }}, -->
+    <!-- {{ item["content"] }} -->
+    <!-- <button -->
+    <!-- @click="apiEditStatSwitch(item['id'], 'undo')" -->
+    <!-- v-if="!item['editStatus']" -->
+    <!-- > -->
+    <!-- Edit -->
+    <!-- </button> -->
+    <!-- <input -->
+    <!-- type="text" -->
+    <!-- v-if="item['editStatus']" -->
+    <!-- v-model="item['editContent']" -->
+    <!-- @keyup.enter="apiEdit(item['id'], item['editContent'])" -->
+    <!-- /> -->
+    <!-- <button -->
+    <!-- @click="apiEdit(item['id'], item['editContent'])" -->
+    <!-- v-if="item['editStatus']" -->
+    <!-- > -->
+    <!-- Update -->
+    <!-- </button> -->
+    <!-- <button -->
+    <!-- @click="apiEditStatSwitch(item['id'], 'undo')" -->
+    <!-- v-if="item['editStatus']" -->
+    <!-- > -->
+    <!-- Cancel -->
+    <!-- </button> -->
+    <!-- </li> -->
+    <!-- </ul> -->
+
+    <!-- <h4>Tasks done</h4> -->
+    <!-- <ul class="doneTasks"> -->
+    <!-- <li v-for="(item, index) in this.fetchedData.done" :key="index"> -->
+    <!-- <input type="checkbox" :value="item['id']" v-model="selection" /> -->
+    <!-- {{ item["id"] }}, -->
+    <!-- {{ item["content"] }} -->
+    <!-- <button -->
+    <!-- class="doneEditBut" -->
+    <!-- @click="apiEditStatSwitch(item['id'], 'done')" -->
+    <!-- v-if="!item['editStatus']" -->
+    <!-- > -->
+    <!-- Edit -->
+    <!-- </button> -->
+    <!-- <input -->
+    <!-- type="text" -->
+    <!-- v-if="item['editStatus']" -->
+    <!-- v-model="item['editContent']" -->
+    <!-- @keyup.enter="apiEdit(item['id'], item['editContent'])" -->
+    <!-- /> -->
+    <!-- <button -->
+    <!-- @click="apiEdit(item['id'], item['editContent'])" -->
+    <!-- v-if="item['editStatus']" -->
+    <!-- > -->
+    <!-- Update -->
+    <!-- </button> -->
+    <!-- <button -->
+    <!-- @click="apiEditStatSwitch(item['id'], 'done')" -->
+    <!-- v-if="item['editStatus']" -->
+    <!-- > -->
+    <!-- Cancel -->
+    <!-- </button> -->
+    <!-- </li> -->
+    <!-- </ul> -->
+
+    <!-- <br /><br /> -->
+    <!-- <button @click="apiDone()">Done</button> | -->
+    <!-- <button @click="apiUndo()">Undo</button> | -->
+    <!-- <button @click="apiDelete()">Delete</button> -->
+    <!-- <br /><br /> -->
+    <!-- <table align="center"> -->
+    <!-- <td v-for="(item, index) in this.pagination.maxPage" :key="index"> -->
+    <!-- <button @click="apiIndex(item)">{{ item }}</button> -->
+    <!-- </td> -->
+    <!-- </table> -->
+    <!-- <br /><br /> -->
   </div>
 </template>
 
 <script>
+import HelloWorld from "@/components/HelloWorld.vue";
+import Add from "@/components/Add.vue";
+import Tasks from "@/components/tasks.vue";
+import Done from "@/components/Done.vue";
+import Undo from "@/components/Undo.vue";
+import Delete from "@/components/Delete.vue";
+import Pagination from "@/components/Pagination.vue";
+// import dTasks from "@/components/dtasks.vue";
 import sendReq from "@/plugins/sendReq";
+// import process from "@/plugins/sendReq";
+// import classify from "@/plugins/classifier";
 import { API } from "@/constants/config";
 /* eslint-disable */
 // @ is an alias to /src
@@ -122,6 +175,7 @@ export default {
   name: "Todo", //自己取的名字，最好跟檔名一樣
   data() {
     return {
+      inTest: "send in!",
       selection: [],
       selectStat: false,
       fetchedData: {
@@ -152,6 +206,9 @@ export default {
       let data = result['data']
       data = this.preprocess(data)
       this.calssifyTasks(data)
+      // this.fetchedData.undo=[]
+      // this.fetchedData.done=[]
+      // classify(data, this.fetchedData.undo, this.fetchedData.done)
 
       //page
       this.pagination.dbLen = result['db_len']
@@ -180,6 +237,7 @@ export default {
           this.fetchedData.done.push(data);
         }
       }
+      this.$forceUpdate();  
     },
     async apiIndex(page){
       let config = {
@@ -195,6 +253,9 @@ export default {
       let result = await sendReq(config);
       let data = result['data']
       this.calssifyTasks(data)
+      // this.fetchedData.undo=[]
+      // this.fetchedData.done=[]
+      // classify(data, this.fetchedData.undo, this.fetchedData.done)
     },
     async apiDone() {
       if (this.selection.length !== 0) {
@@ -212,6 +273,9 @@ export default {
           let result = await sendReq(config);
           let data = result['data']
           this.calssifyTasks(data);
+          // this.fetchedData.undo=[]
+          // this.fetchedData.done=[]
+          // classify(data, this.fetchedData.undo, this.fetchedData.done)
         }
         this.selection = [];
       }
@@ -232,29 +296,35 @@ export default {
           let result = await sendReq(config);
           let data = result['data']
           this.calssifyTasks(data);
+          // this.fetchedData.undo=[]
+          // this.fetchedData.done=[]
+          // classify(data, this.fetchedData.undo, this.fetchedData.done)
         }
         this.selection = [];
       }
     },
-    async apiAdd(apiNewTask) {
-      if (apiNewTask !== "") {
-        this.pagination.page = 1
-        let config = {
-          baseURL: this.apiURL,
-          url: "/add",
-          method: "post",
-          params: {
-            page: this.pagination.page,
-            limit: this.pagination.limit
-          },
-          data: JSON.stringify({ content: apiNewTask }),
-        };
-        let result = await sendReq(config);
-        let data = result['data']
-        this.calssifyTasks(data);
-        this.apiNewTask = "";
-      }
-    },
+    // async apiAdd(apiNewTask) {
+    //   if (apiNewTask !== "") {
+    //     this.pagination.page = 1
+    //     let config = {
+    //       baseURL: this.apiURL,
+    //       url: "/add",
+    //       method: "post",
+    //       params: {
+    //         page: this.pagination.page,
+    //         limit: this.pagination.limit
+    //       },
+    //       data: JSON.stringify({ content: apiNewTask }),
+    //     };
+    //     let result = await sendReq(config);
+    //     let data = result['data']
+    //     // this.fetchedData.undo=[]
+    //     // this.fetchedData.done=[]
+    //     // classify(data, this.fetchedData.undo, this.fetchedData.done)
+    //     this.calssifyTasks(data);
+    //     this.apiNewTask = "";
+    //   }
+    // },
     async apiDelete() {
       if (this.selection.length !== 0) {
         for (let i = 0; i < this.selection.length; i++) {
@@ -271,6 +341,9 @@ export default {
           let result = await sendReq(config);
           let data = result['data']
           this.calssifyTasks(data);
+          // this.fetchedData.undo=[]
+          // this.fetchedData.done=[]
+          // classify(data, this.fetchedData.undo, this.fetchedData.done)
         }
       }
       this.selection = [];
@@ -306,7 +379,40 @@ export default {
         let result = await sendReq(config);
         let data = result['data']
         this.calssifyTasks(data);
+        // this.fetchedData.undo=[]
+        // this.fetchedData.done=[]
+        // classify(data, this.fetchedData.undo, this.fetchedData.done)
       }
+    },
+    // Component Functions
+    returnData(data){
+      data = this.preprocess(data)
+      this.calssifyTasks(data)
+    },
+    updateSelection(arr){
+      this.selection = arr
+    },
+    returnSelection(arr, mode){
+      if (mode === "delete") {
+        this.selection = arr
+      }else{
+        for (let i = 0; i < arr.length; i++) {
+          let task = arr[i];
+          if (!this.selection.includes(task)) {
+            this.selection.push(task);
+          }
+        }
+        for (let i = 0; i < this.selection.length; i++) {
+          let task = this.selection[i];
+          if (!arr.includes(task)) {
+            this.selection.splice(i, 1);
+          }
+        }
+      }
+    },
+    returnPage(arr){
+      this.pagination.page=arr.page
+      this.pagination.limit=arr.limit
     },
     selectAll(arr, selection = this.selection) {
       for (let i = 0; i < arr.length; i++) {
@@ -316,6 +422,7 @@ export default {
         }
       }
     },
+    // Selection Functions
     clearSelection(arr, selection = this.selection) {
       for (let i = 0; i < arr.length; i++) {
         let task = arr[i]["id"];
@@ -363,9 +470,15 @@ export default {
       }
     },
   },
-  //components: {
-  //  HelloWorld //我要把他變成html標籤 <HelloWorld>
-  //}
+  components: {
+   HelloWorld,
+   Add,
+   Tasks,
+   Done,
+   Undo,
+   Delete,
+   Pagination
+  }
 };
 </script>
 <style lang="stylus">

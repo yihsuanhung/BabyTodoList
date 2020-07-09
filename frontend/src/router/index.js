@@ -1,6 +1,7 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import Home from "../views/Home.vue";
+import Todov4 from "../views/Todov4.vue"; // import name可以自己取 但最好跟檔名一樣
 import Todo from "../views/Todo.vue"; // import name可以自己取 但最好跟檔名一樣
 import Daniel from "../views/Daniel.vue";
 
@@ -22,6 +23,11 @@ const routes = [
     // which is lazy-loaded when the route is visited.
     component: () =>
       import(/* webpackChunkName: "about" */ "../views/About.vue")
+  },
+  {
+    path: "/todov4", //自己取，都小寫
+    name: "Todov4", //自己取，最好跟檔名一樣
+    component: Todov4 // 上面import的名字叫什麼 這邊就要打什麼
   },
   {
     path: "/todo", //自己取，都小寫
