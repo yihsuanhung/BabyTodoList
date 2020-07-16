@@ -49,108 +49,6 @@
     />
 
     <span v-show="selection.length !== 0">Selection: {{ selection }}</span>
-    <!-- <pre> -->
-    <!-- <input  -->
-    <!-- type="text"  -->
-    <!-- placeholder="Add new task" -->
-    <!-- v-model="apiNewTask"  -->
-    <!-- @keyup.enter="apiAdd(apiNewTask)" -->
-    <!-- /> <button @click="apiAdd(apiNewTask)">Add</button> -->
-    <!-- </pre> -->
-
-    <!-- <button @click="selectAllFunction('all')">Select All</button> | -->
-    <!-- <button @click="reverseFunction('all')">Reverse</button> | -->
-    <!-- <button @click="clearFunction('all')">Clear</button> -->
-
-    <!-- <br /><br /> -->
-    <!-- <button @click="apiDone()">Done</button> | -->
-    <!-- <button @click="apiUndo()">Undo</button> | -->
-    <!-- <button @click="apiDelete()">Delete</button> -->
-
-    <!-- <br /><br /> -->
-
-    <!-- <h4>Tasks todo</h4> -->
-    <!-- <button @click="selectAllFunction('undo')">Select All</button> | -->
-    <!-- <button @click="reverseFunction('undo')">Reverse</button> | -->
-    <!-- <button @click="clearFunction('undo')">Clear</button> -->
-    <!-- <br /> -->
-    <!-- <ul class="undoTasks"> -->
-    <!-- <li v-for="(item, index) in this.fetchedData.undo" :key="index"> -->
-    <!-- <input type="checkbox" :value="item['id']" v-model="selection" /> -->
-    <!-- {{ item["id"] }}, -->
-    <!-- {{ item["content"] }} -->
-    <!-- <button -->
-    <!-- @click="apiEditStatSwitch(item['id'], 'undo')" -->
-    <!-- v-if="!item['editStatus']" -->
-    <!-- > -->
-    <!-- Edit -->
-    <!-- </button> -->
-    <!-- <input -->
-    <!-- type="text" -->
-    <!-- v-if="item['editStatus']" -->
-    <!-- v-model="item['editContent']" -->
-    <!-- @keyup.enter="apiEdit(item['id'], item['editContent'])" -->
-    <!-- /> -->
-    <!-- <button -->
-    <!-- @click="apiEdit(item['id'], item['editContent'])" -->
-    <!-- v-if="item['editStatus']" -->
-    <!-- > -->
-    <!-- Update -->
-    <!-- </button> -->
-    <!-- <button -->
-    <!-- @click="apiEditStatSwitch(item['id'], 'undo')" -->
-    <!-- v-if="item['editStatus']" -->
-    <!-- > -->
-    <!-- Cancel -->
-    <!-- </button> -->
-    <!-- </li> -->
-    <!-- </ul> -->
-
-    <!-- <h4>Tasks done</h4> -->
-    <!-- <ul class="doneTasks"> -->
-    <!-- <li v-for="(item, index) in this.fetchedData.done" :key="index"> -->
-    <!-- <input type="checkbox" :value="item['id']" v-model="selection" /> -->
-    <!-- {{ item["id"] }}, -->
-    <!-- {{ item["content"] }} -->
-    <!-- <button -->
-    <!-- class="doneEditBut" -->
-    <!-- @click="apiEditStatSwitch(item['id'], 'done')" -->
-    <!-- v-if="!item['editStatus']" -->
-    <!-- > -->
-    <!-- Edit -->
-    <!-- </button> -->
-    <!-- <input -->
-    <!-- type="text" -->
-    <!-- v-if="item['editStatus']" -->
-    <!-- v-model="item['editContent']" -->
-    <!-- @keyup.enter="apiEdit(item['id'], item['editContent'])" -->
-    <!-- /> -->
-    <!-- <button -->
-    <!-- @click="apiEdit(item['id'], item['editContent'])" -->
-    <!-- v-if="item['editStatus']" -->
-    <!-- > -->
-    <!-- Update -->
-    <!-- </button> -->
-    <!-- <button -->
-    <!-- @click="apiEditStatSwitch(item['id'], 'done')" -->
-    <!-- v-if="item['editStatus']" -->
-    <!-- > -->
-    <!-- Cancel -->
-    <!-- </button> -->
-    <!-- </li> -->
-    <!-- </ul> -->
-
-    <!-- <br /><br /> -->
-    <!-- <button @click="apiDone()">Done</button> | -->
-    <!-- <button @click="apiUndo()">Undo</button> | -->
-    <!-- <button @click="apiDelete()">Delete</button> -->
-    <!-- <br /><br /> -->
-    <!-- <table align="center"> -->
-    <!-- <td v-for="(item, index) in this.pagination.maxPage" :key="index"> -->
-    <!-- <button @click="apiIndex(item)">{{ item }}</button> -->
-    <!-- </td> -->
-    <!-- </table> -->
-    <!-- <br /><br /> -->
   </div>
 </template>
 
@@ -390,6 +288,7 @@ export default {
       this.calssifyTasks(data)
     },
     updateSelection(arr){
+      console.log('------', arr , '---------')
       this.selection = arr
     },
     returnSelection(arr, mode){

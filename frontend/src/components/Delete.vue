@@ -12,7 +12,7 @@ export default {
   props: ["inArr", "inPage", "inLimit"],
   data() {
     return {
-      apiURL: API.Host + ":" + API.Port
+      apiURL: API.Host + ":" + API.Port,
     };
   },
   methods: {

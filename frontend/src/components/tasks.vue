@@ -99,7 +99,9 @@ export default {
   },
   methods: {
     emitSelection() {
+      console.log(this.selection)
       this.$emit("TaskOutSelect", this.selection);
+      this.selection = []
     },
     preprocess(objArr) {
       // Add two field, 'editStatus' and 'editContent', to each object

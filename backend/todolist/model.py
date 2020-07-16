@@ -75,6 +75,10 @@ class Model:
         result = self.c.execute(sql_exe).fetchall()
         # print("pagination")
         return result
+        # self.find({'data':{},'limit':5,'add'})
+
+    def find(self):
+        pass
 
     # def edit_on(self, table_name=None, task_id=None):
     #     sql_exe = f"update {table_name} set editstat = true where id = {task_id};"

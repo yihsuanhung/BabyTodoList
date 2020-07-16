@@ -46,7 +46,7 @@ class Controller:
             result = self.paged_index(limit=limit, offset=offset)
             return {'data': result, 'db_len': db_len}
         else:
-            return {'data': "no data available"}
+            return {'status': 7788788, 'data': "no data available"}
 
     def add_task(self, data):
         result = self.model.add_task(data=data, table_name=self.table_name)
