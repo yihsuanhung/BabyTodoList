@@ -44,18 +44,22 @@ class Controller:
         # print(f"max page for limit={limit}: {max_page} ")
         if page <= max_page:
             result = self.paged_index(limit=limit, offset=offset)
-            return {'data': result, 'db_len': db_len}
+            return {'data': result, 'db_len': db_len, 'code': 0}
         else:
-            return {'status': 7788788, 'data': "no data available"}
+            return {'code': 1, 'data': "no data available"}
 
-    def add_task(self, data):
+    def add_task(self, data, pagination=False, page=None, limit=None):
         result = self.model.add_task(data=data, table_name=self.table_name)
         if result['code'] == 0:
-            return_page = self.model.index(table_name=self.table_name)
-            return_page = convert_list_to_dict(return_page)
-            return return_page
+            if (pagination and page!=None and limit!=None):
+                return_page = self.pagination(page=page, limit=limit)
+                return {'code':0, 'msg':'Success!', 'data': return_page}
+            else:
+                return_page = self.model.index(table_name=self.table_name)
+                return_page = convert_list_to_dict(return_page)
+                return {'code':0, 'msg':'Success!', 'data': return_page}
         else:
-            return {'code': 1, 'msg': 'something wrong'}
+            return {'code': 1, 'msg': 'Something wrong'}
 
     def delete_task(self, task_id):
         result = self.model.delete_task(task_id=task_id, table_name=self.table_name)
@@ -92,19 +96,3 @@ class Controller:
             return return_page
         else:
             return {'code': 1, 'msg': 'something wrong'}
-
-    # def edit_on(self, task_id):
-    #     result = self.model.edit_on(task_id=task_id, table_name=self.table_name)
-    #     return_page = self.model.index(table_name=self.table_name)
-    #     if result['code'] == 0:
-    #         return return_page
-    #     else:
-    #         return {'code': 1, 'msg': 'something wrong'}
-    #
-    # def edit_off(self, task_id):
-    #     result = self.model.edit_off(task_id=task_id, table_name=self.table_name)
-    #     return_page = self.model.index(table_name=self.table_name)
-    #     if result['code'] == 0:
-    #         return return_page
-    #     else:
-    #         return {'code': 1, 'msg': 'something wrong'}

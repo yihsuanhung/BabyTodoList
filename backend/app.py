@@ -2,11 +2,15 @@ from flask import Flask, jsonify, request, render_template, url_for, redirect
 from backend.todolist.controller import Controller
 from flask_cors import CORS
 import json
-
+# from flask_sqlalchemy import SQLAlchemy
 # from forms import SignUpForm
 # import cgi
 
 app = Flask(__name__)
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////test_orm.db'
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# db = SQLAlchemy(app)
+
 CORS(app)
 controller = Controller(table_name="TodoListTest")
 
@@ -23,25 +27,6 @@ def index():
     return jsonify(result)
 
 
-# def pagination(page, limit):
-#     db_len = controller.table_length()['length']
-#     offset = limit * (page - 1)
-#
-#     # find the maximum page number
-#     if db_len % limit == 0:
-#         max_page = int(db_len / limit)
-#     else:
-#         max_page = int(db_len / limit) + 1
-#
-#     # print(f"max page for limit={limit}: {max_page} ")
-#
-#     if page <= max_page:
-#         result = controller.paged_index(limit=limit, offset=offset)
-#         return jsonify({'data': result, 'db_len': db_len})
-#     else:
-#         return "no data available"
-
-
 # 檢索（分頁）
 @app.route('/index')
 def paged_index():
@@ -56,8 +41,12 @@ def add_task():
         data = request.get_data()
         data = json.loads(data)
         data = data["content"]
-        controller.add_task(data=data)
-        page = controller.pagination(page=int(request.args['page']), limit=int(request.args['limit']))
+        page = controller.add_task(
+            data=data,
+            pagination=True,
+            page=int(request.args['page']),
+            limit=int(request.args['limit'])
+        )['data']
         return jsonify(page)
 
     else:
@@ -123,28 +112,6 @@ def task_undo(task_id):
 def table_length():
     result = controller.table_length()
     return jsonify(result)
-
-
-# 開啟編輯
-# @app.route('/editon/<int:task_id>', methods=['GET', 'PUT'])
-# def edit_on(task_id):
-#     if request.method == 'PUT':
-#         result = controller.edit_on(task_id)
-#         return jsonify(result)
-#     else:
-#         err_msg = {'code': 1, 'msg': 'ERROR: please use PUT method'}
-#         return jsonify(err_msg)
-
-
-# 關閉編輯
-# @app.route('/editoff/<int:task_id>', methods=['GET', 'PUT'])
-# def edit_off(task_id):
-#     if request.method == 'PUT':
-#         result = controller.edit_off(task_id)
-#         return jsonify(result)
-#     else:
-#         err_msg = {'code': 1, 'msg': 'ERROR: please use PUT method'}
-#         return jsonify(err_msg)
 
 
 @app.route('/create_table')

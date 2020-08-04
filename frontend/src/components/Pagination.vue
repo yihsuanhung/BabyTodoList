@@ -13,14 +13,14 @@ import sendReq from "@/plugins/sendReq";
 import { API } from "@/constants/config";
 export default {
   name: "Pagination",
-  props: ["page", "limit", "dbLen", "maxPage"],
+  props: ["inPage", "inLimit", "dbLen", "maxPage"],
   data() {
     return {
       apiURL: API.Host + ":" + API.Port,
       outData: [],
       pageconfig: {
-        page: this.page,
-        limit: this.limit,
+        page: this.inPage,
+        limit: this.inLimit,
         dbLen: this.dbLen
         // maxPage: this.maxPage
       }
@@ -40,8 +40,8 @@ export default {
       this.pageconfig.page = pag;
       let result = await sendReq(config);
       let data = result["data"];
-      this.$emit("TaskOutIndex", data);
-      this.$emit("PagesOut", {
+      this.$emit("outData", data);
+      this.$emit("outPage", {
         page: this.pageconfig.page,
         limit: this.pageconfig.limit
       });

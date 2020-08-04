@@ -83,11 +83,11 @@ import sendReq from "@/plugins/sendReq";
 // import classify from "@/plugins/classifier";
 // import process from "@/plugins/sendReq";
 import { API } from "@/constants/config";
+import { EventBus } from "@/plugins/bus.js";
 export default {
   name: "Tasks",
   props: {
     inData: Object,
-    inSelection: Array,
     inPage: Number,
     inLimit: Number
   },
@@ -97,11 +97,16 @@ export default {
       selection: []
     };
   },
+  mounted() {
+    EventBus.$on("TasksSelectionBus", arr => {
+      this.selection = arr;
+    });
+  },
   methods: {
     emitSelection() {
-      console.log(this.selection)
-      this.$emit("TaskOutSelect", this.selection);
-      this.selection = []
+      // this.$emit("TaskOutSelect", this.selection);
+      EventBus.$emit("TasksSelectionBus", this.selection);
+      // this.selection = [];
     },
     preprocess(objArr) {
       // Add two field, 'editStatus' and 'editContent', to each object
@@ -150,7 +155,7 @@ export default {
         // data = classify(data);
         // data = data.undo;
         // data = this.preprocess(data);
-        this.$emit("TasksOutEdit", data);
+        this.$emit("outData", data);
         // this.fetchedData.undo=[]
         // this.fetchedData.done=[]
         // classify(data, this.fetchedData.undo, this.fetchedData.done)

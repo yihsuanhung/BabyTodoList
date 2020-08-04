@@ -6,7 +6,7 @@
         placeholder="Add new task"
         v-model="newTask" 
         v-on:input="Text = $event" 
-        @keyup.enter="Add(newTask); $emit('outtest', outt)"
+        @keyup.enter="Add(newTask)"
       /> <button @click="Add(newTask)">Add</button>
     </pre>
   </div>
@@ -18,12 +18,9 @@ import sendReq from "@/plugins/sendReq";
 import { API, Pagination } from "@/constants/config";
 export default {
   name: "Add",
-  props: ["intest", "inData"],
+  props: [],
   data() {
     return {
-      outt: "send out!",
-      intt: this.intest,
-      listData: this.inData,
       newTask: "",
       apiURL: API.Host + ":" + API.Port,
       pagination: {
@@ -32,12 +29,9 @@ export default {
       }
     };
   },
-  created() {},
   methods: {
     async Add(newTask) {
-      console.log(this.intt);
       if (newTask !== "") {
-        // this.pagination.page = 1;
         let config = {
           baseURL: this.apiURL,
           url: "/add",
@@ -51,7 +45,10 @@ export default {
         let result = await sendReq(config);
         let data = result["data"];
         this.$emit("outData", data);
-        this.$emit("outPage", { page: 1, limit: this.pagination.limit });
+        this.$emit("outPage", {
+          page: this.pagination.page,
+          limit: this.pagination.limit
+        });
         this.newTask = "";
       }
     }

@@ -1,51 +1,40 @@
 <template>
   <div id="todo">
     <h3>TDL</h3>
-    <Add
-      :intest="inTest"
-      :data="this.fetchedData"
-      @outData="returnData($event)"
-      @outPage="returnPage($event)"
-    />
+    <Add @outData="returnData($event)" @outPage="returnPage($event)" />
 
     <Tasks
       :inData="this.fetchedData"
-      :inSelection="this.selection"
       :inPage="this.pagination.page"
       :inLimit="this.pagination.limit"
-      @TasksOutEdit="returnData($event)"
-      @TaskOutSelect="updateSelection($event)"
+      @outData="returnData($event)"
     />
 
     <Done
-      :inArr="selection"
       :inPage="this.pagination.page"
       :inLimit="this.pagination.limit"
-      @TasksOutDone="returnData($event)"
+      @outData="returnData($event)"
     />
 
     <Undo
-      :inArr="selection"
       :inPage="this.pagination.page"
       :inLimit="this.pagination.limit"
-      @TasksOutUndo="returnData($event)"
+      @outData="returnData($event)"
     />
 
     <Delete
-      :inArr="selection"
       :inPage="this.pagination.page"
       :inLimit="this.pagination.limit"
-      @TasksOutDelete="returnData($event)"
-      @SelectionOut="updateSelection($event)"
+      @outData="returnData($event)"
     />
 
     <Pagination
-      :page="this.pagination.page"
-      :limit="this.pagination.limit"
+      :inPage="this.pagination.page"
+      :inLimit="this.pagination.limit"
       :dbLen="this.pagination.dbLen"
       :maxPage="this.pagination.maxPage"
-      @PagesOut="returnPage($event)"
-      @TaskOutIndex="returnData($event)"
+      @outPage="returnPage($event)"
+      @outData="returnData($event)"
     />
 
     <span v-show="selection.length !== 0">Selection: {{ selection }}</span>
@@ -60,11 +49,12 @@ import Done from "@/components/Done.vue";
 import Undo from "@/components/Undo.vue";
 import Delete from "@/components/Delete.vue";
 import Pagination from "@/components/Pagination.vue";
-// import dTasks from "@/components/dtasks.vue";
+// import Fake from "@/components/Fake.vue";
 import sendReq from "@/plugins/sendReq";
 // import process from "@/plugins/sendReq";
 // import classify from "@/plugins/classifier";
 import { API } from "@/constants/config";
+import { EventBus } from "@/plugins/bus.js";
 /* eslint-disable */
 // @ is an alias to /src
 // import HelloWorld from "@/components/HelloWorld.vue"; //把html引用進來
@@ -74,6 +64,7 @@ export default {
   data() {
     return {
       inTest: "send in!",
+      busTest: "",
       selection: [],
       selectStat: false,
       fetchedData: {
@@ -91,6 +82,12 @@ export default {
   },
   created() {
     this.getRequest();
+    let isLogin = this.$store.state.info.isLogin
+    console.log(isLogin)
+    this.$store.dispatch('checkLoginStatus', {
+      amount: 10
+    })
+    console.log(this.$store.state.info.isLogin)
   },
   methods: {
     async getRequest() {
@@ -101,16 +98,16 @@ export default {
         params: this.pagination
       }
       let result = await sendReq(config); 
-      let data = result['data']
-      data = this.preprocess(data)
-      this.calssifyTasks(data)
-      // this.fetchedData.undo=[]
-      // this.fetchedData.done=[]
-      // classify(data, this.fetchedData.undo, this.fetchedData.done)
-
-      //page
-      this.pagination.dbLen = result['db_len']
-      this.pagination.maxPage = Math.ceil(this.pagination.dbLen/this.pagination.limit)
+      if (result.code === 0){
+        let data = result['data']
+        data = this.preprocess(data)
+        this.calssifyTasks(data)
+        //page
+        this.pagination.dbLen = result['db_len']
+        this.pagination.maxPage = Math.ceil(this.pagination.dbLen/this.pagination.limit)
+      }else{
+        console.log("[ERROR] Fail in fetching data")
+      }
     },
     preprocess(objArr){
       // Add two field, 'editStatus' and 'editContent', to each object
@@ -287,10 +284,10 @@ export default {
       data = this.preprocess(data)
       this.calssifyTasks(data)
     },
-    updateSelection(arr){
-      console.log('------', arr , '---------')
-      this.selection = arr
-    },
+    // updateSelection(arr){
+    //   // console.log('------', arr , '---------')
+    //   this.selection = arr
+    // },
     returnSelection(arr, mode){
       if (mode === "delete") {
         this.selection = arr
@@ -320,6 +317,9 @@ export default {
           selection.push(task);
         }
       }
+    },
+    test(){
+      console.log("message from Todo.vue")
     },
     // Selection Functions
     clearSelection(arr, selection = this.selection) {
@@ -369,6 +369,22 @@ export default {
       }
     },
   },
+  mounted() {
+    // EventBus.$on("testbus", (arg) => {
+    //   console.log("message from todo.vue")
+    //   // console.log(this.busTest)
+    //   this.busTest = arg*10
+    //   // console.log(this.busTest)
+    // });
+    EventBus.$on("TasksSelectionBus", (arr) =>{
+      this.selection = arr
+      // console.log("boo boo")
+      // console.log(arr)
+    });
+  },
+  beforeDestroy: function() {
+    EventBus.$off();
+  },
   components: {
    HelloWorld,
    Add,
@@ -376,7 +392,8 @@ export default {
    Done,
    Undo,
    Delete,
-   Pagination
+   Pagination,
+  //  Fake
   }
 };
 </script>

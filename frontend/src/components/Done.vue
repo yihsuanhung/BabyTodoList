@@ -7,19 +7,21 @@
 <script>
 import sendReq from "@/plugins/sendReq";
 import { API } from "@/constants/config";
+import { EventBus } from "@/plugins/bus.js";
 export default {
   name: "Done",
-  props: ["inArr", "inPage", "inLimit"],
+  props: ["inPage", "inLimit"],
   data() {
     return {
-      apiURL: API.Host + ":" + API.Port
+      apiURL: API.Host + ":" + API.Port,
+      selection: []
     };
   },
   methods: {
     async taskdone() {
-      if (this.inArr.length !== 0) {
-        for (let i = 0; i < this.inArr.length; i++) {
-          let taskId = this.inArr[i];
+      if (this.selection.length !== 0) {
+        for (let i = 0; i < this.selection.length; i++) {
+          let taskId = this.selection[i];
           let config = {
             baseURL: this.apiURL,
             url: "/done/" + Number(taskId),
@@ -30,15 +32,23 @@ export default {
             }
           };
           let result = await sendReq(config);
+          console.log(result);
           let data = result["data"];
-          this.$emit("TasksOutDone", data);
+          this.$emit("outData", data);
           this.outData = data;
         }
+        EventBus.$emit("TasksSelectionBus", []);
         this.$forceUpdate();
-
-        // this.$emit("SelectionOut", [])
       }
     }
+  },
+  created() {
+    EventBus.$on("TasksSelectionBus", arr => {
+      this.selection = arr;
+    });
+  },
+  beforeDestroy: function() {
+    EventBus.$off();
   }
 };
 </script>
