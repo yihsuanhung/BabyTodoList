@@ -86,7 +86,7 @@ export default {
     console.log(isLogin)
     this.$store.dispatch('checkLoginStatus', {
       amount: 10
-    })
+      })
     console.log(this.$store.state.info.isLogin)
   },
   methods: {
