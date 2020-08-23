@@ -6,7 +6,7 @@
         <input
           type="checkbox"
           :value="item['id']"
-          v-model="selection"
+          v-model="vxs"
           @change="emitSelection()"
         />
         {{ item["id"] }},
@@ -44,7 +44,7 @@
         <input
           type="checkbox"
           :value="item['id']"
-          v-model="selection"
+          v-model="vxs"
           @change="emitSelection()"
         />
         {{ item["id"] }},
@@ -75,6 +75,11 @@
         </button>
       </li>
     </ul>
+    <!-- <div>selected ids: {{ selectedIds }}</div> -->
+    <div>selection: {{ vxs }}</div>
+    <!-- <div>vuex fetchedData: {{ this.$store.state.vxFetchedData }}</div> -->
+    <div><button @click="checkStore()">Check State</button></div>
+    <br />
   </div>
 </template>
 
@@ -84,6 +89,7 @@ import sendReq from "@/plugins/sendReq";
 // import process from "@/plugins/sendReq";
 import { API } from "@/constants/config";
 import { EventBus } from "@/plugins/bus.js";
+// import { mapState } from "vuex";
 export default {
   name: "Tasks",
   props: {
@@ -95,18 +101,48 @@ export default {
     return {
       apiURL: API.Host + ":" + API.Port,
       selection: []
+      // vxs: []
     };
   },
+  created() {},
   mounted() {
     EventBus.$on("TasksSelectionBus", arr => {
       this.selection = arr;
     });
   },
+  computed: {
+    vxs: {
+      get: function() {
+        return this.$store.state.vxSelection;
+      },
+      set: function(arr) {
+        // console.log('')
+        // console.log('setter', arr)
+        // this.vxs = this.$store.state.vxSelection;
+        this.$store.dispatch("selectionAction", arr);
+      }
+    }
+    // ...mapState(["vxSelection"])
+  },
   methods: {
+    fakeLogInTasks() {
+      console.log(this.$store.state.fakeInfo.isLogin);
+      this.$store.dispatch("fakeCheckLoginStatus", "randomArg");
+      console.log(this.$store.state.fakeInfo.isLogin);
+    },
     emitSelection() {
       // this.$emit("TaskOutSelect", this.selection);
-      EventBus.$emit("TasksSelectionBus", this.selection);
+
+      // Eventbus
+      // EventBus.$emit("TasksSelectionBus", this.selection);
+
+      // Vuex
+      this.$store.dispatch("selectionAction", this.vxs);
+
       // this.selection = [];
+    },
+    checkStore() {
+      console.log(this.$store.state.vxSelection);
     },
     preprocess(objArr) {
       // Add two field, 'editStatus' and 'editContent', to each object

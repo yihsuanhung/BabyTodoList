@@ -67,10 +67,10 @@ export default {
       busTest: "",
       selection: [],
       selectStat: false,
-      fetchedData: {
-        undo: [],
-        done: [],
-      },
+      // fetchedData: {
+      //   undo: [],
+      //   done: [],
+      // },
       apiNewTask: "",
       apiURL: API.Host + ":" + API.Port,
       apiConfig: {},
@@ -82,13 +82,13 @@ export default {
   },
   created() {
     this.getRequest();
-    let isLogin = this.$store.state.info.isLogin
-    console.log(isLogin)
-    this.$store.dispatch('checkLoginStatus', {
-      amount: 10
-      })
-    console.log(this.$store.state.info.isLogin)
+    // this.fakeLogIn();
   },
+  computed: {
+    fetchedData: function(){
+      return this.$store.state.vxFetchedData
+    }
+  },  
   methods: {
     async getRequest() {
       let config = {
@@ -108,6 +108,15 @@ export default {
       }else{
         console.log("[ERROR] Fail in fetching data")
       }
+    },
+    fakeLogIn(){
+      // A vuex example
+      // Find it on index.js
+      console.log(this.$store.state.fakeInfo.isLogin)
+      this.$store.dispatch('fakeCheckLoginStatus', {
+        amount: 10
+      })
+      console.log(this.$store.state.fakeInfo.isLogin)
     },
     preprocess(objArr){
       // Add two field, 'editStatus' and 'editContent', to each object
@@ -132,6 +141,7 @@ export default {
           this.fetchedData.done.push(data);
         }
       }
+      this.$store.dispatch("fetchedDataAction", this.fetchedData);
       this.$forceUpdate();  
     },
     async apiIndex(page){
