@@ -68,7 +68,7 @@ export default {
         // this.$emit("SelectionOut", []);
         // EventBus.$emit("TasksSelectionBus", []);
         this.$store.dispatch("selectionAction", []);
-        this.$forceUpdate()
+        this.$forceUpdate();
       }
     }
   },
