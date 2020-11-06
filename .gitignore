@@ -1,0 +1,5 @@
+.idea/workspace.xml
+backend/test.db
+frontend/node_modules/
+frontend/package-lock.json
+frontend/package.json
